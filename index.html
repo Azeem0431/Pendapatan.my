@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pendapatan.my - Tabung Adik Beradik</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            /* --- TAMBAHAN UNTUK PASSWORD PAGE --- */
+        #login-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #0f172a; /* Warna gelap penuh */
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        
+        #main-content { display: none; } /* Sorok kandungan asal */
+
+        .login-box {
+            background: rgba(30, 41, 59, 0.7);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid #38bdf8;
+            backdrop-filter: blur(10px);
+            max-width: 400px;
+            width: 90%;
+        }
+            /* 1. Gantikan nama gambar di bawah (cth: gambar_keluarga.jpg) */
+            background-image: url('gambar_keluarga.jpg');
+            
+            /* 2. Tetapan supaya gambar penuh skrin dan tidak berulang */
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed; /* Gambar tidak bergerak bila skrol */
+            
+            /* 3. Untuk latar belakang 'Gelap & Lutsinar', buang warna asas dan guna overlay */
+            background-color: transparent; 
+        }
+
+        /* Tambahkan overlay gelap supaya teks putih di atasnya masih jelas */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            
+            /* Warna hitam lutsinar. Ubah 0.85 (lebih gelap) kepada 0.70 (lebih terang) */
+            background-color: rgba(15, 23, 42, 0.85); 
+            z-index: -1; /* Letakkan di belakang kandungan */
+        }
+
+        /* Pastikan header dan elemen lain kekal di atas overlay */
+        .navbar-custom, .container {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Kod Navbar yang anda sudah ada (pastikan ia gelap) */
+        .navbar-custom {
+            background: rgba(15, 23, 42, 0.9) !important;
+        }
+        .card-saving { border: none; border-radius: 15px; transition: 0.3s; }
+        .card-saving:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .admin-section { display: none; background: #fff; padding: 20px; border-radius: 15px; margin-top: 30px; border: 1px solid #ddd; }
+        .total-label { font-size: 0.9rem; color: #6c757d; }
+        .amount { font-size: 1.5rem; font-weight: bold; color: #198754; }
+        
+        /* Font Import */
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;800&display=swap');
+
+        .navbar-custom {
+            background: rgba(15, 23, 42, 0.8); /* Warna gelap navy semi-telus */
+            backdrop-filter: blur(15px); /* Efek Glassmorphism */
+            -webkit-backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 18px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* Logo Estetik */
+        .brand-text {
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: #ffffff;
+            font-size: 1.4rem;
+        }
+
+        .brand-dot {
+            color: #38bdf8; /* Biru Neon */
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+        }
+
+        .logo-icon {
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            transform: rotate(-10deg);
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
+        }
+
+        .currency-symbol {
+            color: white;
+            font-weight: 900;
+            font-size: 0.9rem;
+            transform: rotate(10deg);
+        }
+
+        /* Butang Admin Glassmorphism */
+        .btn-admin-glass {
+            position: relative;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #cbd5e1;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .btn-admin-glass:hover {
+            color: #ffffff;
+            border-color: #38bdf8;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .btn-admin-glass::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.1),
+                transparent
+            );
+            transition: 0.5s;
+        }
+
+        .btn-admin-glass:hover::before {
+            left: 100%;
+        }
+
+        /* Gaya baru untuk kad supaya teks nampak jelas */
+        .glass-card {
+            background: rgba(15, 23, 42, 0.7); /* Gelapkan sikit lagi background card */
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.15); /* Terangkan border */
+            padding: 30px !important;
+            transition: all 0.3s ease;
+            color: #ffffff; /* Paksa semua teks jadi putih */
+        }
+
+        /* Tajuk kecil dalam kad */
+        .glass-card h5 {
+            color: #38bdf8; /* Biru terang supaya tajuk menonjol */
+            font-weight: 800;
+            margin-top: 15px;
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+        }
+
+        /* Perenggan/Penerangan dalam kad */
+        .glass-card p {
+            color: #e2e8f0; /* Kelabu sangat cerah (hampir putih) */
+            opacity: 1 !important; /* Pastikan dia tak pudar */
+            line-height: 1.6;
+        }
+
+        /* Kesan bila mouse lalu (Hover) */
+        .glass-card:hover {
+            transform: translateY(-10px);
+            background: rgba(30, 41, 59, 0.9);
+            border-color: #fbbf24; /* Border tukar jadi emas bila hover */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .icon-box {
+            font-size: 3rem;
+            filter: drop-shadow(0 0 10px rgba(255,255,255,0.2));
+        }
+
+        /* --- FOOTER MODERN UPDATED --- */
+        .footer-modern {
+            background: rgba(15, 23, 42, 0.85) !important; /* Lutsinar supaya nampak gambar keluarga */
+            padding: 80px 0 30px;
+            margin-top: 100px;
+            border-top: 1px solid rgba(56, 189, 248, 0.3) !important; /* Border neon nipis di atas */
+            color: #f1f5f9;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .footer-brand { 
+            text-decoration: none; 
+        }
+
+        .logo-icon-sm {
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
+            width: 28px; 
+            height: 28px;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            border-radius: 8px; 
+            font-weight: 900; 
+            font-size: 0.7rem; 
+            color: white;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+        }
+
+        .brand-text-sm { 
+            font-weight: 800; 
+            color: white; 
+            font-size: 1.2rem; 
+            letter-spacing: 1px; 
+        }
+
+        .emergency-calc-card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-radius: 15px;
+            font-size: 0.9rem;
+            color: #cbd5e1;
+        }
+
+        .emergency-calc-card span {
+            display: block;
+        }
+
+        .opacity-90 {
+            opacity: 0.9;
+        }
+
+        .rank-card {
+            background: #1e293b;
+            color: white;
+            border-radius: 15px;
+            margin-bottom: 12px;
+            transition: 0.3s;
+        }
+        .rank-1 { 
+            background: linear-gradient(135deg, #451a03 0%, #1e293b 100%);
+            border: 2px solid #fbbf24 !important; 
+        }
+        .rank-number {
+            width: 35px; height: 35px;
+            background: #334155;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; margin-right: 15px;
+        }
+        .rank-1 .rank-number { background: #fbbf24; color: #000; }
+        .amount-text { font-size: 1.4rem; font-weight: 800; color: #38bdf8; }
+        .rank-1 .amount-text { color: #fbbf24; }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="login-overlay">
+    <div class="login-box">
+        <div class="logo-icon mx-auto mb-3">
+            <span style="color:white; font-weight:bold;">RM</span>
+        </div>
+        <h4 class="text-white fw-bold mb-3">Akses Keluarga</h4>
+        <p class="text-white-50 small mb-4">Sila masukkan kata laluan keluarga untuk melihat leaderboard.</p>
+        <input type="password" id="access-pass" class="form-control mb-3 text-center bg-dark text-white border-secondary" placeholder="Kata Laluan">
+        <button class="btn btn-info w-100 fw-bold" onclick="checkAccess()">MASUK</button>
+    </div>
+</div>
+
+<nav class="navbar navbar-expand-lg navbar-custom">
+    <div class="container d-flex justify-content-between align-items-center">
+        <a class="navbar-brand d-flex align-items-center" href="#">
+            <div class="logo-icon me-2">
+                <span class="currency-symbol">RM</span>
+            </div>
+            <span class="brand-text">PENDAPATAN<span class="brand-dot">.MY</span></span>
+        </a>
+
+        <button class="btn btn-admin-glass" onclick="pergiKeAdmin()">
+            <span class="btn-text">MODE ADMIN</span>
+            <div class="btn-blur"></div>
+        </button>
+    </div>
+</nav>
+
+<div class="container py-4">
+    <div class="text-center mb-5">
+        <h1 class="fw-bold" style="color: #fbbf24;">🏆 LEADERBOARD SIMPANAN</h1>
+        <p class="fw-bold" style="color: #fbbf24;">Siapa paling banyak menabung duduk paling atas!</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8" id="display-area">
+            <div class="text-center p-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 text-muted">Menyusun kedudukan...</p>
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-5" style="border-top: 2px dashed #334155;">
+
+    <div id="admin-panel" class="admin-section shadow-sm p-4 border-0" style="background: #1e293b; border-radius: 20px; color: white;">
+        <h4 class="mb-4 d-flex align-items-center">
+            <span class="badge bg-danger me-2">Admin</span> Kemas Kini Simpanan
+        </h4>
+        <div class="row g-3">
+            <div class="col-md-5">
+                <label class="form-label small text-uppercase fw-bold opacity-75">Nama Adik</label>
+                <input type="text" id="admin-name" class="form-control form-control-lg bg-dark text-white border-secondary" placeholder="Contoh: Ali">
+            </div>
+            <div class="col-md-5">
+                <label class="form-label small text-uppercase fw-bold opacity-75">Jumlah RM</label>
+                <input type="number" id="admin-amount" class="form-control form-control-lg bg-dark text-white border-secondary" placeholder="Contoh: 150">
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button class="btn btn-warning btn-lg w-100 fw-bold" onclick="updateData()">SIMPAN</button>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-5 g-4">
+    <div class="col-md-4">
+        <div class="glass-card h-100 p-4">
+            <div class="icon-box">🛡️</div>
+            <h5 class="fw-bold mt-3">Dana Kecemasan</h5>
+            <p class="small opacity-75">Sediakan payung sebelum hujan. Duit ini pelindung kita jika berlaku perkara luar jangka.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="glass-card h-100 p-4">
+            <div class="icon-box">🚀</div>
+            <h5 class="fw-bold mt-3">Masa Depan Cerah</h5>
+            <p class="small opacity-75">Pelaburan untuk pendidikan, aset, atau impian besar bermula dari RM1 yang pertama.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="glass-card h-100 p-4">
+            <div class="icon-box">💎</div>
+            <h5 class="fw-bold mt-3">Disiplin Diri</h5>
+            <p class="small opacity-75">Menabung melatih kita bersabar dan tidak boros. Ini adalah kunci kekayaan sebenar.</p>
+        </div>
+    </div>
+ <div class="row mt-5 justify-content-center">
+    <div class="col-md-10">
+        <div class="glass-panel p-5">
+            <div class="row align-items-center">
+                <div class="col-lg-7">
+                    <h3 class="fw-bold text-warning mb-3">🛡️ INFO TABUNG KECEMASAN</h3>
+                    <p class="text-white opacity-90">
+                        Tabung kecemasan adalah "benteng" pertama kita. Pakar kewangan menyarankan kita mempunyai sekurang-kurangnya <strong>3 hingga 6 bulan</strong> kos sara hidup sebagai simpanan kecemasan.
+                    </p>
+                    <div class="mt-4">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="badge bg-danger me-2">WAJIB</div>
+                            <span class="small text-white-50">Gunakan hanya untuk: Kemalangan, Kehilangan Pekerjaan, atau Kerosakan Rumah/Kenderaan yang kritikal.</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <div class="emergency-calc-card p-4">
+                        <h6 class="fw-bold text-info text-uppercase mb-3">Formula Sasaran</h6>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Belanja Bulanan:</span>
+                            <span class="text-white fw-bold">Contoh: RM1,500</span>
+                        </div>
+                        <div class="d-flex justify-content-between border-top pt-2 mt-2">
+                            <span>Sasaran Minimum (3 bln):</span>
+                            <span class="text-warning fw-bold">RM4,500</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<style>
+    .rank-card {
+        background: #1e293b;
+        color: white;
+        border-radius: 15px;
+        margin-bottom: 12px;
+        transition: 0.3s;
+    }
+    .rank-1 { 
+        background: linear-gradient(135deg, #451a03 0%, #1e293b 100%);
+        border: 2px solid #fbbf24 !important; 
+    }
+    .rank-number {
+        width: 35px; height: 35px;
+        background: #334155;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: bold; margin-right: 15px;
+    }
+    .rank-1 .rank-number { background: #fbbf24; color: #000; }
+    .amount-text { font-size: 1.4rem; font-weight: 800; color: #38bdf8; }
+    .rank-1 .amount-text { color: #fbbf24; }
+</style>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyARD05zmDszK-zMNokPU2OyfOGXd61QtZI",
+        authDomain: "pendapatanmy.firebaseapp.com",
+        databaseURL: "https://pendapatanmy-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "pendapatanmy",
+        storageBucket: "pendapatanmy.firebasestorage.app",
+        messagingSenderId: "1038201061922",
+        appId: "1:1038201061922:web:c0ba264c4d712ed118c07b",
+        measurementId: "G-PXSLFGZ3Z5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+// FUNGSI CHECK ACCESS (Guna Password 'keluargaaziz')
+    window.checkAccess = function() {
+        const pass = document.getElementById('access-pass').value;
+        if (pass === "3771") {  // <--- TUKAR PASSWORD KAT SINI
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
+            loadData(); // Panggil data firebase bila berjaya masuk
+        } else {
+            alert("Kata laluan salah!");
+        }
+    }
+   onValue(ref(db, 'simpanan/'), (snapshot) => {
+    const data = snapshot.val();
+    const displayArea = document.getElementById('display-area');
+    displayArea.innerHTML = "";
+
+    // Convert ke array & sort
+    let list = [];
+    for (let id in data) { list.push({ name: id, total: parseFloat(data[id]) }); }
+    list.sort((a, b) => b.total - a.total);
+
+    // Render HTML
+    list.forEach((user, index) => {
+        const rank = index + 1;
+        const style = rank === 1 ? 'rank-1' : '';
+        const crown = rank === 1 ? '👑 ' : '';
+        
+        displayArea.innerHTML += `
+            <div class="rank-card ${style} d-flex align-items-center p-3 border">
+                <div class="rank-number">${rank}</div>
+                <div class="flex-grow-1">
+                    <h5 class="mb-0 fw-bold">${crown}${user.name}</h5>
+                </div>
+                <div class="amount-text">RM ${user.total}</div>
+            </div>
+        `;
+    });
+});
+
+    // Fungsi Kemas Kini Data
+    window.updateData = function() {
+        const name = document.getElementById('admin-name').value;
+        const amount = document.getElementById('admin-amount').value;
+
+        if (name && amount) {
+            set(ref(db, 'simpanan/' + name), amount)
+            .then(() => {
+                alert("Data berjaya dikemaskini!");
+                document.getElementById('admin-amount').value = "";
+            })
+            .catch((error) => alert("Ralat: " + error.message));
+        } else {
+            alert("Sila isi nama dan jumlah.");
+        }
+    }
+
+    window.pergiKeAdmin = function() {
+    const password = prompt("Masukkan kata laluan admin untuk masuk:");
+    
+// Anda boleh tukar '1234' kepada kata laluan pilihan anda
+    if (password === "5589") { 
+        window.location.href = "admin.html"; // Ini akan hantar anda ke fail admin.html
+    } else {
+        alert("Kata laluan salah! Anda tidak dibenarkan masuk.");
+    }
+}
+</script>
+
+</body>
+</html>
